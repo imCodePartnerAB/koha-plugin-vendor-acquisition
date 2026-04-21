@@ -30,7 +30,7 @@ use Koha::Acquisition::Booksellers;
 use Koha::AuthorisedValues;
 use Koha::Database;
 
-our $VERSION = "3.2";
+our $VERSION = "3.2-imcode";
 our $API_VERSION = "1.1";
 
 our $metadata = {
@@ -41,7 +41,7 @@ our $metadata = {
     minimum_version => 20.05,
     maximum_version => '',
     version         => $VERSION,
-    description     => 'Handling of acquired orders from vendors such as Adlibris.'
+    description     => 'Handling of acquired orders from vendors such as Adlibris. (imCode fork with fix_host_port patch)'
 };
 
 my $debug = 1;
