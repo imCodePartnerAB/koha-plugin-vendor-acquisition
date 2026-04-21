@@ -38,7 +38,7 @@ Package up the relevant parts as a .kpz Koha plugin file.
 use Modern::Perl;
 use lib '.';
 
-my $filename = "/tmp/koha-plugin-vendor-acquisition-imcode-3.1.kpz";
+my $filename = "/tmp/koha-plugin-vendor-acquisition-imcode-3.2.kpz";
 unlink $filename if -f $filename;
 
 chdir('src') or die "$!";
