@@ -30,7 +30,7 @@ use Koha::Acquisition::Booksellers;
 use Koha::AuthorisedValues;
 use Koha::Database;
 
-our $VERSION = "3.2-imcode";
+our $VERSION = "3.2-2-imcode";
 our $API_VERSION = "1.1";
 
 our $metadata = {
