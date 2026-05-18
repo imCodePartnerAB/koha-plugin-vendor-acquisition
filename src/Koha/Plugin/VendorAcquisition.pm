@@ -823,6 +823,9 @@ sub vendor_order_receive {
         }
 
         if ($token_success && $order && (!defined $order->{errors} || !@{$order->{errors}}) && $order->valid) {
+            if ($cgi->param('save') eq 'process' && $save) {
+                print $cgi->redirect($order->{basket_url});
+            } else {
             my ($template, $loggedinuser, $cookie) = C4::Auth::get_template_and_user({
                 template_name   => $self->mbf_path('receive.tt'),
                 query => $cgi,
@@ -831,10 +834,7 @@ sub vendor_order_receive {
                 authnotrequired => 1,
                 flagsrequired   => {}
             });
-
-            if ($cgi->param('save') eq 'process' && $save) {
-                print $cgi->redirect($order->{basket_url});
-            } else {
+            $template->param( sessionID => $cgi->cookie('CGISESSID') ) if $cgi->cookie('CGISESSID');
 
                 my $budgets = budget_list();
 
