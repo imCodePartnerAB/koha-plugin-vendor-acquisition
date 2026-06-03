@@ -30,7 +30,7 @@ use Koha::Acquisition::Booksellers;
 use Koha::AuthorisedValues;
 use Koha::Database;
 
-our $VERSION = "3.2-2-imcode";
+our $VERSION = "3.2.3";
 our $API_VERSION = "1.1";
 
 our $metadata = {
@@ -41,7 +41,7 @@ our $metadata = {
     minimum_version => 20.05,
     maximum_version => '',
     version         => $VERSION,
-    description     => 'Handling of acquired orders from vendors such as Adlibris. (imCode fork with fix_host_port patch)'
+    description     => 'Handling of acquired orders from vendors such as Adlibris. (imCode version)'
 };
 
 my $debug = 1;
@@ -824,7 +824,16 @@ sub vendor_order_receive {
 
         if ($token_success && $order && (!defined $order->{errors} || !@{$order->{errors}}) && $order->valid) {
             if ($cgi->param('save') eq 'process' && $save) {
-                print $cgi->redirect($order->{basket_url});
+                my $_redir_logger = Koha::Logger->get;
+                $_redir_logger->warn('REDIRECT_DEBUG: basket_url=' . ($order->{basket_url} // 'undef') . ' CGISESSID_before=' . ($cgi->cookie('CGISESSID') // 'undef'));
+                my (undef, undef, $redirect_cookie) = C4::Auth::get_template_and_user({
+                    template_name   => $self->mbf_path('receive.tt'),
+                    query           => $cgi,
+                    type            => 'intranet',
+                    flagsrequired   => {},
+                });
+                $_redir_logger->warn('REDIRECT_DEBUG: CGISESSID_after=' . ($cgi->cookie('CGISESSID') // 'undef'));
+                print $cgi->redirect(-url => $order->{basket_url}, -cookie => $redirect_cookie);
             } else {
             my ($template, $loggedinuser, $cookie) = C4::Auth::get_template_and_user({
                 template_name   => $self->mbf_path('receive.tt'),
