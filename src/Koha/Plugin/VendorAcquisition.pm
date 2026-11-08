@@ -30,14 +30,14 @@ use Koha::Acquisition::Booksellers;
 use Koha::AuthorisedValues;
 use Koha::Database;
 
-our $VERSION = "3.2.3";
+our $VERSION = "3.4.1";
 our $API_VERSION = "1.1";
 
 our $metadata = {
     name            => 'Vendor Acquisition Module',
-    author          => 'Andreas Jonsson',
+    author          => 'Andreas Jonsson (ImCode version)',
     date_authored   => '2020-01-04',
-    date_updated    => "2026-02-10",
+    date_updated    => "2026-11-08",
     minimum_version => 20.05,
     maximum_version => '',
     version         => $VERSION,
@@ -260,11 +260,18 @@ EOF
 }
 
 sub intranet_js {
+    my $nonce = '';
+    if (C4::Context->preference("Version") >= 26.05) {
+      require Koha::ContentSecurityPolicy;
+      my $csp = Koha::ContentSecurityPolicy->new();
+      if ( $csp->is_enabled ) {
+        $nonce = ' nonce="'  . $csp->get_nonce . '"';
+      }
+    }
     # We must inject the label text for the custom permission
     # vendor_order_receive using a javascript, as the default is an
     # empty label in the template permissions.inc.
-    return <<'EOF';
-<script>
+    return "<script$nonce>" . <<'EOF';
 (function () {
     var load = function load () {
         if (window.jQuery) {
@@ -669,6 +676,15 @@ sub configure {
 
     my $budgets = budget_list();
 
+    my $nonce = '';
+    if (C4::Context->preference("Version") >= 26.05) {
+      require Koha::ContentSecurityPolicy;
+      my $csp = Koha::ContentSecurityPolicy->new();
+      if ( $csp->is_enabled ) {
+        $nonce = ' nonce="'  . $csp->get_nonce . '"';
+      }
+    }
+
     my $template = $self->get_template( { file => 'configure.tt' } );
     $template->param(
         lang_dialect => $lang,
@@ -697,7 +713,8 @@ sub configure {
         default_values => \@default_values,
         can_configure => C4::Auth::haspermission(C4::Context->userenv->{'id'}, {'plugins' => 'configure'}),
         csrf_check => C4::Context->preference("Version") >= 24.05,
-        demo_url => $demo_url
+        demo_url => $demo_url,
+        nonce => $nonce,
         );
 
     $self->output_html( $template->output() );
@@ -845,6 +862,15 @@ sub vendor_order_receive {
             });
             $template->param( sessionID => $cgi->cookie('CGISESSID') ) if $cgi->cookie('CGISESSID');
 
+                my $nonce = '';
+                if (C4::Context->preference("Version") >= 26.05) {
+                    require Koha::ContentSecurityPolicy;
+                    my $csp = Koha::ContentSecurityPolicy->new();
+                    if ( $csp->is_enabled ) {
+                        $nonce = ' nonce="'  . $csp->get_nonce . '"';
+                    }
+                }
+
                 my $budgets = budget_list();
 
                 $template->param(
@@ -873,6 +899,7 @@ sub vendor_order_receive {
                     can_configure => C4::Auth::haspermission($userid, {'plugins' => 'configure'}),
                     token       => $self->retrieve_data('token'),
                     csrf_check => C4::Context->preference("Version") >= 24.05,
+                    nonce       => $nonce,
                     );
 
                 $self->output_html( $template->output() );
